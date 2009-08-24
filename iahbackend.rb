@@ -36,6 +36,19 @@ class BackEnd
   end
   
   def start_processing
+    open("|-", "r") do |worker|
+      if worker
+        # here we are in the harness
+        i = 0
+        worker.each_line do |line|
+          @controller.set_ballot_count(i)
+          i = i+1
+         end
+      else
+        # here we are in child thread
+        exec("./iacommand.rb", "-t")
+      end
+    end
     
   end
   
