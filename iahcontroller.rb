@@ -27,29 +27,38 @@
   Debugger.start
 =end
 
+require 'pathname'
+
 class Controller < ::Wx::App
+  
+  attr_reader :total_ballot_count
   
   def on_init  
     @back_end = BackEnd.new(self)
     @view = View.new(self)
     @view.show(true)
+   
   end
   
   def begin_run
-    @back_end.start_processing
+    @processing_thread = Thread.new do
+      @back_end.start_processing
+     end
   end
   
   def stop_run
     @back_end.stop_processing
   end
-  
-  def set_ballots_directory path
-    @back_end.set_ballots_directory path
-  end
-  
+    
   def set_ballot_count cnt
     @ballot_count = cnt
     @view.show_ballot_count "#{cnt} (100%)"
+  end
+  
+  def set_ballots_directory dirname
+    @ballots_directory = dirname
+    @total_number_of_ballots = Pathname.new(@ballots_directory).entries.length
+    @view.show_ballot_count "#{@total_number_of_ballots}"
   end
  
 end

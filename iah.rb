@@ -32,7 +32,6 @@ require 'wx'
 
 require 'iahview'
 require 'iahcontroller'
-require 'iahmodel'
 require 'iahbackend'
 
 Controller.new.main_loop

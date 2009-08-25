@@ -31,6 +31,8 @@
 require 'rubygems'
 require 'getoptlong'
 
+$stdout.sync = true
+
 parser = GetoptLong.new
 parser.set_options(
               ["-h", "--help", GetoptLong::NO_ARGUMENT],

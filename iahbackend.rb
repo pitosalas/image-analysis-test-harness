@@ -32,7 +32,6 @@ class BackEnd
   
   def initialize(contr)
     @controller = contr
-    @ballots_directory = nil
   end
   
   def start_processing
@@ -41,29 +40,16 @@ class BackEnd
         # here we are in the harness
         i = 0
         worker.each_line do |line|
-          @controller.set_ballot_count(i)
+          @controller.set_ballot_count i
           i = i+1
-         end
+        end
       else
         # here we are in child thread
         exec("./iacommand.rb", "-t")
       end
+    end    
+  end
+    
+    def stop_processing
     end
-    
   end
-  
-  def stop_processing
-    
-  end
-  
-  def set_ballots_directory dir
-    @ballots_directory = dir
-    @controller.set_ballot_count calc_ballot_count
-  end
-  
-  def calc_ballot_count
-    p = Pathname.new(@ballots_directory)
-    p.entries.length
-  end
-  
-end
