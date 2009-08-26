@@ -31,36 +31,82 @@ require 'pathname'
 
 class Controller < ::Wx::App
   
-  attr_reader :total_ballot_count
-  
-  def on_init  
+ def on_init  
     @back_end = BackEnd.new(self)
     @view = View.new(self)
     @view.show(true)
-   
+  end
+  
+  def on_run
+    @stats = {}
+    set_mode :idle
+    set_app_name "BallotScanner"
+    super
   end
   
   def begin_run
+    set_mode :running
     @processing_thread = Thread.new do
-      @back_end.start_processing
-     end
+      @back_end.start_processing  @ballots_directory
+      set_mode :ready_to_run
+    end
   end
   
   def stop_run
     @back_end.stop_processing
   end
-    
-  def set_ballot_count cnt
-    @ballot_count = cnt
-    @view.show_ballot_count "#{cnt} (100%)"
-  end
   
   def set_ballots_directory dirname
     @ballots_directory = dirname
-    @total_number_of_ballots = Pathname.new(@ballots_directory).entries.length
-    @view.show_ballot_count "#{@total_number_of_ballots}"
+    reset_all_stats
+    set_stat :ballot_count, Pathname.new(@ballots_directory).entries.length
+    set_mode :ready_to_run
   end
- 
-end
+  
+  def reset_all_stats
+    set_stat :ballot_count, 0
+    set_stat :success_analysis, 0
+    set_stat :failed_analysis, 0
+    set_stat :correctly_scored, 0
+  end
+  
+  def set_stat key, count
+    @stats[key] = count
+    if @stats[:ballot_count] == 0 
+      pct = ""
+    else
+      pct = "(#{(count * 100 / @stats[:ballot_count]).to_int }%)"
+    end
+    @view.set_stat key, "#{count} #{pct}"
+  end
+  
+  def incr_stat key
+    set_stat key, @stats[key] += 1
+  end
 
-    
+  
+  def exit_application
+    @view.close
+  end
+  
+  def start_ballot filename
+    @view.start_ballot filename
+  end
+  
+  #
+  # Change overall mode of the app
+  #
+  # :idle => nothing is happening. Cannot run yet.
+  # :ready_to_run => ballot directory is specified. Non zero ballots there
+  # :running => background processes are running. Now pause and stop commands are available
+  # :paused => suspended 
+  
+  def set_mode newmode
+    @mode = newmode
+    @view.set_mode newmode
+    case newmode
+    when :idle
+       reset_all_stats
+    end
+  end
+end

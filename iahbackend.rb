@@ -34,22 +34,44 @@ class BackEnd
     @controller = contr
   end
   
-  def start_processing
+  def process_line line
+    case line
+      when /^ballot ("(.+)"|(\S+))$/
+        @controller.start_ballot $1
+      when /^success$/
+        @controller.incr_stat :success_analysis
+      when /^failure$/
+        @controller.incr_stat :failed_analysis
+      else
+        puts "unexpected return from sub process: #{line}"
+    end
+  end
+  
+  def start_processing dir
     open("|-", "r") do |worker|
       if worker
         # here we are in the harness
-        i = 0
+        line_counter = 0
         worker.each_line do |line|
-          @controller.set_ballot_count i
-          i = i+1
+          line_counter = line_counter + 1
+          process_line(line.chomp)
         end
+        puts "workers end"
       else
         # here we are in child thread
-        exec("./iacommand.rb", "-t")
+        exec("/mydev/ballot-analizer/ba_run.rb", "-d", dir, "-u")
       end
     end    
   end
+  
+  def stop_processing
     
-    def stop_processing
-    end
   end
+  
+  def pause_processing
+    
+  end
+  
+  
+  
+end

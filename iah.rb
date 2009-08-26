@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 =begin
   * Name: Ballot-analyzer
   * Description: Analyze voting ballots

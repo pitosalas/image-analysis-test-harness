@@ -55,7 +55,7 @@ loop do
         break
       when "-v"
         puts "Version 0.0"
-        valid = true
+        valid = false
         break
       end
     end

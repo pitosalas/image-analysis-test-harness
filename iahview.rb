@@ -100,15 +100,16 @@ class View < ::Wx::Frame
   end
   
   def results_table_pane
-    @ballots_to_go = result_value("ballots to go:")
-    @ballots_completed = result_value("ballots completed:")
-    @failed_to_scan = result_value("failed to scan:")
-    @correct_results = result_value("correct results:")
-    @time_per_ballot = result_value("time per ballot:")
-    @time_overall = result_value("time overall:")
+    @total_ballots = result_value("Total Ballots:")
+    @cant_analyze = result_value("Can't Analyze:")
+    @analyzed = result_value("Analyzed:")
+    @correctly_scored = result_value("Correctly Scored:")
+    @time_per_ballot = result_value("Time per Ballot:")
+    @time_overall = result_value("Time Overall:")
+    @current_ballot = result_value("Current Ballot:")
   end
   
-  def result_value(label, initial="12 (17%)")
+  def result_value label, initial=""
     label_box = Wx::StaticText.new frame_panel, -1, label
     text_box = Wx::StaticText.new frame_panel, -1, initial
     results_pane_sizer.add_item label_box, :proportion => 1, :flag => Wx::EXPAND
@@ -171,18 +172,70 @@ class View < ::Wx::Frame
     evt_button(@stop_button)        { @controller.stop_run }
     evt_button(@begin_run)          { @controller.begin_run }
     evt_button(@sel_ballot_folder)  { get_ballots_directory }
+    evt_button(@quit_button)        { @controller.exit_application}
   end
   
   def get_ballots_directory
     dialog = Wx::DirDialog.new(self, "Select Ballots Directory", Dir.pwd)
-
     if dialog.show_modal() == Wx::ID_OK
       @controller.set_ballots_directory dialog.get_path
     end
   end
-  
-  def show_ballot_count str
-    @ballots_to_go.label = str
+
+#
+# Update one of the various statistics in the dialog based on the key parameter
+#
+  def set_stat key, string
+    case key
+    when :ballot_count
+      @total_ballots.label = string
+    when :success_analysis
+      @analyzed.label = string
+    when :failed_analysis
+      @cant_analyze.label = string
+    when :correctly_scored
+      @correctly_scored.label = string
+    end
   end
-    
+  
+#
+# Update display to show that we are starting a new ballot
+#
+  def start_ballot str
+    @current_ballot.label = str
+  end
+
+# 
+# update view to reflect mode changes. Enable/disable controls, etc.
+#  
+  def set_mode newmode
+    case newmode
+    when :idle
+      @begin_run.enable false
+      @quit_button.enable true
+      @pause_button.enable false
+      @sel_ballot_folder.enable true
+    when :ready_to_run
+      @begin_run.enable true
+      @quit_button.enable true
+      @pause_button.enable false
+      @sel_ballot_folder.enable true
+    when :running
+      @sel_ballot_folder.enable false
+      @pause_button.enable true
+      @quit_button.enable true
+      @sel_ballot_folder.enable false
+      @begin_run.enable false
+    when :paused
+      @begin_run.enable true
+      @sel_ballot_folder.enable false
+      @pause_button.enable false
+      @quit_button.enable true
+      @sel_ballot_folder.enable true
+    when :finished
+      @begin_run.enable true
+      @sel_ballot_folder.enable false
+      @pause_button.enable false
+    end
+  end
 end
