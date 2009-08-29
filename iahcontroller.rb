@@ -1,14 +1,14 @@
 =begin
-  * Name: Ballot-analyzer
+  * Name: iahcontroller.rb
   * Description: Analyze voting ballots
   * Author: Pito Salas
   * Copyright: (c) R. Pito Salas and Associates, Inc.
   * Date: January 2009
   * License: GPL
 
-  This file is part of Ballot-analyzer.
+  This file is part of Ballot-Analizer
 
-  Ballot-analyzer is free software: you can redistribute it and/or modify
+  Ballot-Analizer is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
@@ -39,9 +39,16 @@ class Controller < ::Wx::App
   
   def on_run
     @stats = {}
+    @start_time = {}
+    @total_ballot_scan_time = 0
     set_mode :idle
     set_app_name "BallotScanner"
-    super
+    begin
+      super
+    rescue Exception => e
+      puts e.message
+      retry
+    end
   end
   
   def begin_run
@@ -70,6 +77,10 @@ class Controller < ::Wx::App
     set_stat :correctly_scored, 0
   end
   
+  def get_stat key
+    @stats[key]
+  end
+  
   def set_stat key, count
     @stats[key] = count
     if @stats[:ballot_count] == 0 
@@ -84,23 +95,59 @@ class Controller < ::Wx::App
     set_stat key, @stats[key] += 1
   end
 
-  
+#
+# Closing the main view causes a clean exit to the whole application
+#
   def exit_application
     @view.close
   end
-  
+
+#
+# Called when a ballot scan is beginning by the background process
+#
   def start_ballot filename
+    mark_start_time(:ballot)
     @view.start_ballot filename
   end
+#
+# Called when ballot scan completes without throwing an error
+#  
+  def ballot_success
+    incr_stat :success_analysis
+    mark_end_time(:ballot)
+  end
+#
+# Called when a ballot scan fails to complete
+# 
+  def ballot_failed
+    incr_stat :failed_analysis
+  end
+#
+# Mark start of event identified by key
+# 
+  def mark_start_time key
+    @start_time[key] = Time.now
+  end
+#
+# Mark end of an event identified by key
+# 
+  def mark_end_time key
+    elapsed_time = Time.now - @start_time[key]
+    if key == :ballot
+      @total_ballot_scan_time += elapsed_time
+      average_so_far = @total_ballot_scan_time / get_stat(:success_analysis)
+      fmt_avg = sprintf("%.2f sec", average_so_far)
+      @view.set_stat :time_per_ballot, fmt_avg 
+    end
+  end
   
-  #
-  # Change overall mode of the app
-  #
-  # :idle => nothing is happening. Cannot run yet.
-  # :ready_to_run => ballot directory is specified. Non zero ballots there
-  # :running => background processes are running. Now pause and stop commands are available
-  # :paused => suspended 
-  
+#
+# Change overall mode of the app
+#
+# :idle => nothing is happening. Cannot run yet.
+# :ready_to_run => ballot directory is specified. Non zero ballots there
+# :running => background processes are running. Now pause and stop commands are available
+# :paused => suspended 
   def set_mode newmode
     @mode = newmode
     @view.set_mode newmode

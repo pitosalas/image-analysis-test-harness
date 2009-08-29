@@ -195,6 +195,8 @@ class View < ::Wx::Frame
       @cant_analyze.label = string
     when :correctly_scored
       @correctly_scored.label = string
+    when :time_per_ballot
+      @time_per_ballot.label = string
     end
   end
   

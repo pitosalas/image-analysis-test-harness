@@ -1,0 +1,15 @@
+To do list
+----------
+
+- add timing of the image analysis processes
+- create heads up display
+- add upstream records for areas of image analysis
+- add ground truth feature
+- refactor iahview.rb to take advantage of repeating patterns
+- take out diagnostic mode from iahdsl. it slows things down
+- add a command line option to ba_run command to enable the creation of intermediate images
+- create a gem for ballot-analyzer and for iaharness
+- implement stop processing command
+- implement pause processing command
+- implement show logging command
+- when exception causes failure, include a second param to 'failure' as to why
