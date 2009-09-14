@@ -87,7 +87,7 @@ class View < ::Wx::Frame
   end
   
   def wizard_img_control(filename)
-    bmp_file = File.join( File.dirname(__FILE__), 'images', filename)
+    bmp_file = File.join( File.dirname(__FILE__), '../../images', filename)
     bmp = Wx::Bitmap.new(bmp_file, Wx::BITMAP_TYPE_GIF)
     Wx::BitmapButton.new(frame_panel, 0, :bitmap => bmp, :style => Wx::NO_BORDER)
   end
