@@ -1,0 +1,7 @@
+task :default do
+  puts "i am default"
+end
+
+task :test do
+    puts "hello world"
+end

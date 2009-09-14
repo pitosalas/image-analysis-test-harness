@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 =begin
   * Name: Ballot-analyzer
   * Description: Analyze voting ballots
@@ -29,48 +28,8 @@
 =end
 
 require 'rubygems'
-require 'getoptlong'
+require 'wx'
 
-$stdout.sync = true
-
-parser = GetoptLong.new
-parser.set_options(
-              ["-h", "--help", GetoptLong::NO_ARGUMENT],
-              ["-t", "--test", GetoptLong::NO_ARGUMENT],
-              ["-v", "--version", GetoptLong::NO_ARGUMENT])
-
-valid = false
-loop do
-  
-  begin
-    opt, arg = parser.get
-    break if not opt
-    case opt
-      when "-h"
-        puts "Usage: ..."
-        valid = true
-        break
-      when "-t"
-        valid = true
-        break
-      when "-v"
-        puts "Version 0.0"
-        valid = false
-        break
-      end
-    end
-  end
-
-if valid
-   puts "start"
-   i = 0
-    5.times do
-    puts "ballot #{i}"
-    delay = rand(5).to_i
-    sleep delay
-    i = i+1
-  end
-  puts "exit"
-else
-  puts "invalid parameters for iacommand"
-end
+require 'iah/iahview'
+require 'iah/iahcontroller'
+require 'iah/iahbackend'
