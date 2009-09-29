@@ -138,9 +138,9 @@ class View < ::Wx::Frame
   
   def button_pane_sizer
     @button_pane_sizer ||= (
-      btn_pane_sizer = Wx::HBoxSizer.new
-      frame_sizer.add_item btn_pane_sizer, :proportion => 0, :flag => Wx::ALIGN_RIGHT | Wx::ALIGN_BOTTOM
-      btn_pane_sizer
+      the_sizer = Wx::HBoxSizer.new
+      frame_sizer.add_item the_sizer, :proportion => 0, :flag => Wx::ALIGN_RIGHT | Wx::ALIGN_BOTTOM
+      the_sizer
     )
   end
   

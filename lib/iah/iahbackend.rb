@@ -58,7 +58,7 @@ class BackEnd
         puts "workers end"
       else
         # here we are in child thread
-        exec("/mydev/ballot-analizer/ba_run.rb", "-d", dir, "-u")
+        exec("/mydev/ballot-analizer/bin/ba_run.rb", "-d", dir, "-u")
       end
     end    
   end
